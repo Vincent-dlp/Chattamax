@@ -1,13 +1,19 @@
-import streamlit as st
-import gspread
+import json
 from google.oauth2.service_account import Credentials
+import gspread
 
-# Configurer l'authentification Google
-credentials_info = st.secrets["GOOGLE_KEY"]
-credentials = Credentials.from_service_account_info(json.loads(credentials_info))
+# Charger les informations depuis les secrets Streamlit
+import streamlit as st
 
-# Connecter à Google Sheets
+keyfile_dict = json.loads(st.secrets["GOOGLE_KEY"])
+credentials = Credentials.from_service_account_info(keyfile_dict)
+
+# Connexion à Google Sheets
+client = gspread.authorize(credentials)
+
+# Ouvrir le fichier Google Sheets
 sheet = client.open("Chattamax").sheet1
+
 
 # Titre de l'application
 st.title("Chattamax")
