@@ -3,12 +3,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # Configurer l'authentification Google
-scope = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-credentials = Credentials.from_service_account_file("google_key.json", scopes=scope)
-client = gspread.authorize(credentials)
+credentials_info = st.secrets["GOOGLE_KEY"]
+credentials = Credentials.from_service_account_info(json.loads(credentials_info))
 
 # Connecter à Google Sheets
 sheet = client.open("Chattamax").sheet1
