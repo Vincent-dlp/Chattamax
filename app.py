@@ -1,6 +1,7 @@
 import json
 from google.oauth2.service_account import Credentials
 import gspread
+from datetime import datetime
 
 # Charger les informations depuis les secrets Streamlit
 import streamlit as st
@@ -37,5 +38,5 @@ q8 = st.date_input(
 # Bouton pour soumettre
 if st.button("Soumettre"):
     # Ajouter les réponses dans Google Sheets
-    sheet.append_row([q1, q2, q3, q4, q5,q6,q7,q8])
+    sheet.append_row([q1, q2, q3, q4, q5,q6,q7,str(q8)])
     st.success("Vos réponses ont été enregistrées avec succès !")
