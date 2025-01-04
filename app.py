@@ -28,9 +28,14 @@ q4 = st.text_input("Intitulé du pari ?")
 q5 = st.number_input("Quelle mise ?", min_value=0, step=1, format="%d")
 q6 = st.number_input("Quelle cote ? ", min_value=0.0, step=0.05, format="%.2f")
 q7 = st.radio("Statut du pari ?",["En cours", "Gagnant", "Perdant","Annulé"])
+q8 = st.date_input(
+    "📅 À quelle date a été pris le pari ?",
+    value=pd.Timestamp.now(),  # Date par défaut : aujourd'hui
+    help="Choisissez la date du pari."
+)
 
 # Bouton pour soumettre
 if st.button("Soumettre"):
     # Ajouter les réponses dans Google Sheets
-    sheet.append_row([q1, q2, q3, q4, q5,q6,q7])
+    sheet.append_row([q1, q2, q3, q4, q5,q6,q7,q8])
     st.success("Vos réponses ont été enregistrées avec succès !")
