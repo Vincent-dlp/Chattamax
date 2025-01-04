@@ -32,5 +32,5 @@ q7 = st.radio("Statut du pari ?",["En cours", "Gagnant", "Perdant","Annulé"])
 # Bouton pour soumettre
 if st.button("Soumettre"):
     # Ajouter les réponses dans Google Sheets
-    sheet.append_row([q1, q2, q3, q4, q5])
+    sheet.append_row([q1, q2, q3, q4, q5,q6,q7])
     st.success("Vos réponses ont été enregistrées avec succès !")
