@@ -6,14 +6,16 @@ import gspread
 import streamlit as st
 
 keyfile_dict = json.loads(st.secrets["GOOGLE_KEY"])
-credentials = Credentials.from_service_account_info(keyfile_dict)
+credentials = Credentials.from_service_account_info(keyfile_dict, scopes=[
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+])
 
 # Connexion à Google Sheets
 client = gspread.authorize(credentials)
 
 # Ouvrir le fichier Google Sheets
 sheet = client.open("Chattamax").sheet1
-
 
 # Titre de l'application
 st.title("Chattamax")
