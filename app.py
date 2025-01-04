@@ -22,10 +22,12 @@ st.title("Chattamax")
 
 # Formulaire
 q1 = st.radio("Qui a pris le bet ?", ["Jo", "Ceba", "Ju","Cardo","Vincent"])
-q2 = st.selectbox("Quel sport ?", ["Football", "Tennis", "Ski", "Basket"])
-q3 = st.text_input("Intitulé du pari ?")
-q4 = st.number_input("Quelle mise ?", min_value=0, step=1, format="%d")
-q5 = st.number_input("Quelle cote ? ", min_value=0.0, step=0.05, format="%.2f")
+q2 = st.selectbox("Quel sport ?", ["Basket","Biathlon","Football","Formule 1","Rugby à 7", "Rugby à 13","Rugby à 15","Ski alpin","Ski de fond", "Tennis"])
+q2 = st.selectbox("Quel bet type ?", ["Buteur","Passeur","Ace","Vainqueur","Podium", "H2H","3way","2way", "Buteur et son équipe gagne","Autre"])
+q4 = st.text_input("Intitulé du pari ?")
+q5 = st.number_input("Quelle mise ?", min_value=0, step=1, format="%d")
+q6 = st.number_input("Quelle cote ? ", min_value=0.0, step=0.05, format="%.2f")
+q7 = st.radio("Statut du pari ?",["En cours", "Gagnant", "Perdant","Annulé"])
 
 # Bouton pour soumettre
 if st.button("Soumettre"):
