@@ -7,16 +7,13 @@ from datetime import datetime
 # Charger les informations depuis les secrets Streamlit
 import streamlit as st
 
-st.sidebar.title("Menu de navigation")
+st.set_page_config(page_title="Chattamax", page_icon="⚽", layout="wide")
 
-# Ajouter une option pour accéder aux stats de foot
-page = st.sidebar.radio("Choisissez une page :", ["🏠 Accueil", "⚽ Stats Foot"])
+st.sidebar.title("📌 Navigation")
 
-if page == "🏠 Accueil":
-    st.title("Bienvenue sur Chattamax 🎉")
-    st.write("Sélectionnez une page dans le menu de gauche.")
-elif page == "⚽ Stats Foot":
-    import stats_foot
+# Streamlit détecte automatiquement les fichiers dans le dossier `pages/`
+st.sidebar.page_link("🏠 Accueil", "app.py")
+st.sidebar.page_link("⚽ Stats Foot", "pages/stats_foot.py")
 
 
 keyfile_dict = json.loads(st.secrets["GOOGLE_KEY"])
