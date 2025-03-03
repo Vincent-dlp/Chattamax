@@ -4,26 +4,26 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # Configuration API
-API_KEY = "VOTRE_CLE_API"  # Remplacez par ta clé API Football
+API_KEY = "VOTRE_CLE_API"  # Remplacez par votre clé API Football
 BASE_URL = "https://v3.football.api-sports.io/"
 HEADERS = {"x-apisports-key": API_KEY}
 
 # Liste des ligues disponibles
 LEAGUES = {
-    129: "Primera Nacional (Argentine)",
-    188: "A-League (Australie)",
-    344: "Super League (Chine)",
-    71: "Serie A (Brésil)",
-    265: "Major League Soccer (USA)",
-    169: "Liga MX (Mexique)",
-    239: "Ekstraklasa (Pologne)",
-    242: "Allsvenskan (Suède)",
-    98: "J1 League (Japon)",
-    262: "K League 1 (Corée du Sud)",
-    250: "Super League (Suisse)",
-    252: "Eliteserien (Norvège)",
-    307: "Premier League (Afrique du Sud)",
-    253: "Liga 1 (Indonésie)"
+    129: "Primera Nacional (Argentina)",
+    188: "A-League (Australia)",
+    344: "Primera División (Bolivia)",
+    71: "Serie A (Brazil)",
+    265: "Primera División (Chile)",
+    169: "Super League (China)",
+    239: "Primera A (Colombia)",
+    242: "Liga Pro (Ecuador)",
+    98: "J1 League (Japan)",
+    262: "Liga MX (Mexico)",
+    250: "Division Profesional - Apertura (Paraguay)",
+    252: "Division Profesional - Clausura (Paraguay)",
+    307: "Pro League (Saudi-Arabia)",
+    253: "Major League Soccer (USA)"
 }
 
 SEASONS = [2024, 2025]  # Saisons disponibles
@@ -36,7 +36,7 @@ st.sidebar.header("📊 Filtres")
 selected_leagues = st.sidebar.multiselect("Sélectionnez les ligues à analyser", options=list(LEAGUES.keys()), format_func=lambda x: LEAGUES[x])
 
 # Paramètres de filtrage
-min_matches = st.sidebar.slider("Nombre minimum de matchs joués par le joueur", 1, 10, 3)
+min_matches = st.sidebar.slider("Nombre minimum de matchs joués par l'équipe", 1, 10, 3)
 min_goals = st.sidebar.slider("Nombre minimum de buts", 0, 10, 2)
 min_assists = st.sidebar.slider("Nombre minimum de passes décisives", 0, 10, 2)
 
@@ -59,42 +59,55 @@ if st.sidebar.button("Lancer l'analyse"):
                     team_ids[team["team"]["id"]] = {"nom": team["team"]["name"], "ligue": league_id}
                     league_mapping[team["team"]["id"]] = league_id
     
-    # Récupérer les stats des joueurs
-    players_stats = {}
+    # Récupérer les 10 derniers matchs des équipes
+    all_fixtures = set()
     for team_id in team_ids.keys():
         for season in SEASONS:
-            url_players = f"{BASE_URL}players?team={team_id}&season={season}"
-            response_players = requests.get(url_players, headers=HEADERS)
-            data_players = response_players.json()
+            url_fixtures = f"{BASE_URL}fixtures?team={team_id}&season={season}"
+            response_fixtures = requests.get(url_fixtures, headers=HEADERS)
+            data_fixtures = response_fixtures.json()
             
-            if "response" in data_players:
-                for player_data in data_players["response"]:
-                    player_id = player_data["player"]["id"]
-                    player_name = player_data["player"]["name"]
-                    team_name = team_ids.get(team_id, {}).get("nom", "Inconnu")
-                    goals = player_data["statistics"][0]["goals"].get("total", 0) or 0
-                    assists = player_data["statistics"][0]["goals"].get("assists", 0) or 0
-                    matches_played = player_data["statistics"][0]["games"].get("appearences", 0) or 0
-                    minutes_played = player_data["statistics"][0]["games"].get("minutes", 0) or 0
-                    avg_minutes = minutes_played / matches_played if matches_played > 0 else 0
-                    goals_per_minute = minutes_played / goals if goals > 0 else 0
-                    
-                    if player_id not in players_stats:
-                        players_stats[player_id] = {
-                            "Nom": player_name,
-                            "Club": team_name,
-                            "Buts": goals,
-                            "Passes D": assists,
-                            "Matchs Joués": matches_played,
-                            "Minutes Jouées": minutes_played,
-                            "Moyenne Minutes": avg_minutes,
-                            "Buts toutes les X min": goals_per_minute
-                        }
+            if "response" in data_fixtures:
+                matches = sorted(
+                    [match for match in data_fixtures.get("response", []) 
+                     if match['league']['id'] in selected_leagues],
+                    key=lambda x: x['fixture']['date'], reverse=True
+                )[:10]  # Prendre les 10 derniers matchs
+                
+                all_fixtures.update(match['fixture']['id'] for match in matches)
     
-    # Filtrer les joueurs
-    filtered_players = [player for player in players_stats.values() if player["Buts"] >= min_goals or player["Passes D"] >= min_assists and player["Matchs Joués"] >= min_matches]
+    # Récupérer les stats des joueurs
+    players_stats = {}
+    for fixture_id in all_fixtures:
+        url_players_stats = f"{BASE_URL}fixtures/players?fixture={fixture_id}"
+        response_players_stats = requests.get(url_players_stats, headers=HEADERS)
+        data_players_stats = response_players_stats.json()
+        
+        if "response" in data_players_stats:
+            for team_data in data_players_stats["response"]:
+                team_id = team_data['team']['id']
+                team_name = team_ids.get(team_id, {}).get("nom", "Inconnu")
+                league_name = league_mapping.get(team_id, "Inconnu")
+                
+                for player_data in team_data["players"]:
+                    if player_data.get("statistics"):
+                        player_id = player_data["player"]["id"]
+                        player_name = player_data["player"]["name"]
+                        goals = player_data["statistics"][0]["goals"].get("total", 0) or 0
+                        assists = player_data["statistics"][0]["goals"].get("assists", 0) or 0
+                        matches_played = player_data["statistics"][0]["games"].get("appearences", 0) or 0
+                        minutes_played = player_data["statistics"][0]["games"].get("minutes", 0) or 0
+                        
+                        if player_id not in players_stats:
+                            players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Ligue": league_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0}
+                        
+                        players_stats[player_id]["Buts"] += goals
+                        players_stats[player_id]["Passes D"] += assists
+                        players_stats[player_id]["Matchs Joués"] += matches_played
+                        players_stats[player_id]["Minutes Jouées"] += minutes_played
     
-    df_results = pd.DataFrame(filtered_players)
+    # Convertir les résultats en DataFrame
+    df_results = pd.DataFrame(players_stats.values())
     
     if not df_results.empty:
         st.write("### Résultats de l'analyse")
