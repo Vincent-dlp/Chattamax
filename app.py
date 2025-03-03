@@ -7,6 +7,18 @@ from datetime import datetime
 # Charger les informations depuis les secrets Streamlit
 import streamlit as st
 
+st.sidebar.title("Menu de navigation")
+
+# Ajouter une option pour accéder aux stats de foot
+page = st.sidebar.radio("Choisissez une page :", ["🏠 Accueil", "⚽ Stats Foot"])
+
+if page == "🏠 Accueil":
+    st.title("Bienvenue sur Chattamax 🎉")
+    st.write("Sélectionnez une page dans le menu de gauche.")
+elif page == "⚽ Stats Foot":
+    import stats_foot
+
+
 keyfile_dict = json.loads(st.secrets["GOOGLE_KEY"])
 credentials = Credentials.from_service_account_info(keyfile_dict, scopes=[
     "https://www.googleapis.com/auth/spreadsheets",
