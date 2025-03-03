@@ -69,11 +69,12 @@ if st.sidebar.button("Lancer l'analyse"):
             if "response" in data_fixtures:
                 matches = sorted(
                     [match for match in data_fixtures.get("response", []) 
-                     if match['league']['id'] in selected_leagues],
+                     if match['league']['id'] in selected_leagues and match['fixture']['status']['short'] == "FT"],
                     key=lambda x: x['fixture']['date'], reverse=True
                 )[:10]  # Prendre les 10 derniers matchs
                 
                 all_fixtures.update(match['fixture']['id'] for match in matches)
+                st.write(f"Équipe {team_id} - Matchs récupérés : {[match['fixture']['id'] for match in matches]}")
     
     # Récupérer les stats des joueurs
     players_stats = {}
