@@ -36,7 +36,6 @@ st.sidebar.header("📊 Filtres")
 selected_leagues = st.sidebar.multiselect("Sélectionnez les ligues à analyser", options=list(LEAGUES.keys()), format_func=lambda x: LEAGUES[x])
 
 # Paramètres de filtrage
-min_matches = st.sidebar.slider("Nombre minimum de matchs joués par l'équipe", 1, 10, 3)
 min_goals = st.sidebar.slider("Nombre minimum de buts", 0, 10, 2)
 min_assists = st.sidebar.slider("Nombre minimum de passes décisives", 0, 10, 2)
 
@@ -106,8 +105,14 @@ if st.sidebar.button("Lancer l'analyse"):
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
     
+    # Filtrer les joueurs selon les critères définis
+    filtered_players = [
+        stats for stats in players_stats.values()
+        if stats['Buts'] >= min_goals or stats['Passes D'] >= min_assists
+    ]
+    
     # Convertir les résultats en DataFrame
-    df_results = pd.DataFrame(players_stats.values())
+    df_results = pd.DataFrame(filtered_players)
     
     if not df_results.empty:
         st.write("### Résultats de l'analyse")
