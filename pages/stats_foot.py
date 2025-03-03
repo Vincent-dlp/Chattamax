@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # Configuration API
-API_KEY = "VOTRE_CLE_API"  # Remplacez par votre clé API Football
+API_KEY = "8610d983bdbd1a47d730f42a0f595b7f"  # Remplacez par votre clé API Football
 BASE_URL = "https://v3.football.api-sports.io/"
 HEADERS = {"x-apisports-key": API_KEY}
 
