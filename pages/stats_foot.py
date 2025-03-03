@@ -75,8 +75,6 @@ if st.sidebar.button("Lancer l'analyse"):
                 )[:10]  # Prendre les 10 derniers matchs
                 
                 all_fixtures.update(match['fixture']['id'] for match in matches)
-                st.write(f"Équipe {team_id} - Matchs récupérés : {[match['fixture']['id'] for match in matches]}")
-
     
     # Récupérer les stats des joueurs
     players_stats = {}
@@ -99,9 +97,6 @@ if st.sidebar.button("Lancer l'analyse"):
                         assists = player_data["statistics"][0]["goals"].get("assists", 0) or 0
                         matches_played = player_data["statistics"][0]["games"].get("appearences", 0) or 0
                         minutes_played = player_data["statistics"][0]["games"].get("minutes", 0) or 0
-
-                        st.write(f"Joueur {player_name} ({team_name}) - Buts: {goals}, Passes: {assists}, Matchs: {matches_played}")
-
                         
                         if player_id not in players_stats:
                             players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Ligue": league_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0}
@@ -112,8 +107,6 @@ if st.sidebar.button("Lancer l'analyse"):
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
     
     # Convertir les résultats en DataFrame
-    st.write(f"Ligue des matchs récupérés : {[match['league']['id'] for match in matches]}")
-
     df_results = pd.DataFrame(players_stats.values())
     
     if not df_results.empty:
