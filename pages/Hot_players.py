@@ -147,7 +147,7 @@ if run_analysis:
                             players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0, "Temps de jeu moyen": 0, "Buts toutes les X minutes": 0}
                         
                         players_stats[player_id]["Buts"] += goals
-                        players_stats[player_id]["P. Décisives"] += assists
+                        players_stats[player_id]["Passes D"] += assists
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
                         players_stats[player_id]["Temps de jeu moyen"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))
@@ -156,7 +156,7 @@ if run_analysis:
     # Filtrer les joueurs selon les critères définis
     filtered_players = [
         stats for stats in players_stats.values()
-        if stats['Buts'] >= min_goals or stats['P. Décisives'] >= min_assists
+        if stats['Buts'] >= min_goals or stats['Passes D'] >= min_assists
     ]
     
     # Convertir les résultats en DataFrame
