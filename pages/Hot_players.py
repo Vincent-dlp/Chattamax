@@ -163,7 +163,7 @@ if run_analysis:
     df_results = pd.DataFrame(filtered_players)
     
     if run_analysis:
-    with col1:
+     with col1:
         if not df_results.empty:
             st.write("# Joueurs en forme du moment")
             st.dataframe(df_results.sort_values(by="Buts", ascending=False))
