@@ -44,7 +44,6 @@ if st.sidebar.button("Lancer l'analyse"):
     st.write("🔄 Analyse en cours...")
     
     team_ids = {}
-    league_mapping = {}
     
     # Récupérer les équipes des ligues sélectionnées
     for league_id in selected_leagues:
@@ -55,8 +54,7 @@ if st.sidebar.button("Lancer l'analyse"):
             
             if "response" in data_teams and data_teams["response"]:
                 for team in data_teams["response"]:
-                    team_ids[team["team"]["id"]] = {"nom": team["team"]["name"], "ligue": league_id}
-                    league_mapping[team["team"]["id"]] = league_id
+                    team_ids[team["team"]["id"]] = {"nom": team["team"]["name"]}
     
     # Récupérer les 10 derniers matchs des équipes
     all_fixtures = set()
@@ -74,7 +72,6 @@ if st.sidebar.button("Lancer l'analyse"):
                 )[:10]  # Prendre les 10 derniers matchs
                 
                 all_fixtures.update(match['fixture']['id'] for match in matches)
-                st.write(f"Équipe {team_id} - Matchs récupérés : {[match['fixture']['id'] for match in matches]}")
     
     # Récupérer les stats des joueurs
     players_stats = {}
@@ -87,7 +84,6 @@ if st.sidebar.button("Lancer l'analyse"):
             for team_data in data_players_stats["response"]:
                 team_id = team_data['team']['id']
                 team_name = team_ids.get(team_id, {}).get("nom", "Inconnu")
-                league_name = league_mapping.get(team_id, "Inconnu")
                 
                 for player_data in team_data["players"]:
                     if player_data.get("statistics"):
@@ -95,16 +91,18 @@ if st.sidebar.button("Lancer l'analyse"):
                         player_name = player_data["player"]["name"]
                         goals = player_data["statistics"][0]["goals"].get("total", 0) or 0
                         assists = player_data["statistics"][0]["goals"].get("assists", 0) or 0
-                        matches_played = player_data["statistics"][0]["games"].get("appearences", 0) or 0
                         minutes_played = player_data["statistics"][0]["games"].get("minutes", 0) or 0
+                        matches_played = 1 if minutes_played > 1 else 0
                         
                         if player_id not in players_stats:
-                            players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Ligue": league_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0}
+                            players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0, "Temps de jeu moyen": 0, "Buts toutes les X minutes": 0}
                         
                         players_stats[player_id]["Buts"] += goals
                         players_stats[player_id]["Passes D"] += assists
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
+                        players_stats[player_id]["Temps de jeu moyen"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1)
+                        players_stats[player_id]["Buts toutes les X minutes"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1)
     
     # Filtrer les joueurs selon les critères définis
     filtered_players = [
