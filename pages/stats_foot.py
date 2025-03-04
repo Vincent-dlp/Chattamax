@@ -146,8 +146,8 @@ if st.sidebar.button("Lancer l'analyse"):
                         players_stats[player_id]["Passes D"] += assists
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
-                        players_stats[player_id]["Temps de jeu moyen"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1)
-                        players_stats[player_id]["Buts toutes les X minutes"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1)
+                        players_stats[player_id]["Temps de jeu moyen"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))
+                        players_stats[player_id]["Buts toutes les X minutes"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1))
     
     # Filtrer les joueurs selon les critères définis
     filtered_players = [
