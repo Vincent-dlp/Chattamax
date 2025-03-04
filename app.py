@@ -7,9 +7,13 @@ from datetime import datetime
 # Charger les informations depuis les secrets Streamlit
 import streamlit as st
 
-st.set_page_config(page_title="Chattamax", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Paris", page_icon="⚽", layout="wide")
 
-st.sidebar.title("📌 Navigation")
+# Barre de navigation
+st.sidebar.title("Navigation")
+st.sidebar.markdown("[🏠 Paris](./)", unsafe_allow_html=True)
+st.sidebar.markdown("[🔥 Hot Player](./stats_foot)", unsafe_allow_html=True)
+
 
 # Menu de navigation manuel avec selectbox
 page = st.sidebar.selectbox("Choisissez une page :", ["🏠 Accueil", "⚽ Stats Foot"])
