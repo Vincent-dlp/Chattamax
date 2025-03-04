@@ -46,7 +46,6 @@ LEAGUES = {
     383: "Ligat Ha'al (Israel)",
     135: "Serie A (Italy)",
     136: "Serie B (Italy)",
-    98: "J1 League (Japan)",
     389: "Premier League (Kazakhstan)",
     364: "1. Liga (Latvia)",
     362: "A Lyga (Lithuania)",
@@ -147,8 +146,8 @@ if st.sidebar.button("Lancer l'analyse"):
                         players_stats[player_id]["Passes D"] += assists
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
-                        players_stats[player_id]["Temps de jeu moyen"] = int(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1)
-                        players_stats[player_id]["Buts toutes les X minutes"] = int(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1))players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1)
+                        players_stats[player_id]["Temps de jeu moyen"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1)
+                        players_stats[player_id]["Buts toutes les X minutes"] = players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1)
     
     # Filtrer les joueurs selon les critères définis
     filtered_players = [
