@@ -77,19 +77,20 @@ LEAGUES = {
 SEASONS = [2024, 2025]  # Saisons disponibles
 
 # Interface utilisateur avec Streamlit
-st.title("⚽ Analyse des Statistiques de Football")
-st.sidebar.header("📊 Filtres")
+st.title("🔥 Hot players")
 
-# Sélection des ligues
-selected_leagues = st.sidebar.multiselect("Sélectionnez les ligues à analyser", options=list(LEAGUES.keys()), format_func=lambda x: LEAGUES[x])
+col1, col2 = st.columns([2, 1])  # Col1 = Résultats, Col2 = Filtres
 
-# Paramètres de filtrage
-min_goals = st.sidebar.slider("Nombre minimum de buts", 0, 10, 2)
-min_assists = st.sidebar.slider("Nombre minimum de passes décisives", 0, 10, 2)
+with col2:  # Filtres placés dans la colonne de droite
+    st.header("📊 Filtres")
+    selected_leagues = st.multiselect("Sélectionnez les ligues à analyser", options=list(LEAGUES.keys()), format_func=lambda x: LEAGUES[x])
+    min_goals = st.slider("Nombre minimum de buts", 0, 10, 2)
+    min_assists = st.slider("Nombre minimum de passes décisives", 0, 10, 2)
+    run_analysis = st.button("Lancer l'analyse")
 
-# Bouton de lancement
-if st.sidebar.button("Lancer l'analyse"):
-    st.write("🔄 Analyse en cours...")
+if run_analysis:
+    with col1:  # Résultats placés en dessous des filtres
+        st.write("🔄 Analyse en cours...")
     
     team_ids = {}
     
@@ -146,7 +147,7 @@ if st.sidebar.button("Lancer l'analyse"):
                             players_stats[player_id] = {"Nom": player_name, "Club": team_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0, "Temps de jeu moyen": 0, "Buts toutes les X minutes": 0}
                         
                         players_stats[player_id]["Buts"] += goals
-                        players_stats[player_id]["Passes D"] += assists
+                        players_stats[player_id]["P. Décisives"] += assists
                         players_stats[player_id]["Matchs Joués"] += matches_played
                         players_stats[player_id]["Minutes Jouées"] += minutes_played
                         players_stats[player_id]["Temps de jeu moyen"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))
@@ -155,14 +156,17 @@ if st.sidebar.button("Lancer l'analyse"):
     # Filtrer les joueurs selon les critères définis
     filtered_players = [
         stats for stats in players_stats.values()
-        if stats['Buts'] >= min_goals or stats['Passes D'] >= min_assists
+        if stats['Buts'] >= min_goals or stats['P. Décisives'] >= min_assists
     ]
     
     # Convertir les résultats en DataFrame
     df_results = pd.DataFrame(filtered_players)
     
-    if not df_results.empty:
-        st.write("### Résultats de l'analyse")
-        st.dataframe(df_results.sort_values(by="Buts", ascending=False))
-    else:
-        st.write("❌ Aucun joueur ne correspond aux critères sélectionnés.")
+    if run_analysis:
+    with col1:
+        if not df_results.empty:
+            st.write("# Joueurs en forme du moment")
+            st.dataframe(df_results.sort_values(by="Buts", ascending=False))
+        else:
+            st.write("❌ Aucun joueur ne correspond aux critères sélectionnés.")
+
