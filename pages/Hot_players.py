@@ -6,11 +6,6 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Hot Player 🔥", layout="wide")
 
-# Barre de navigation
-st.sidebar.title("Navigation")
-st.sidebar.markdown("[🏠 Paris](./)", unsafe_allow_html=True)
-st.sidebar.markdown("[🔥 Hot Player](./stats_foot)", unsafe_allow_html=True)
-
 # Configuration API
 API_KEY = "8610d983bdbd1a47d730f42a0f595b7f"  # Remplacez par votre clé API Football
 BASE_URL = "https://v3.football.api-sports.io/"

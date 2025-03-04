@@ -9,22 +9,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Paris", page_icon="⚽", layout="wide")
 
-# Barre de navigation
-st.sidebar.title("Navigation")
-st.sidebar.markdown("[🏠 Paris](./)", unsafe_allow_html=True)
-st.sidebar.markdown("[🔥 Hot Player](./stats_foot)", unsafe_allow_html=True)
-
-
-# Menu de navigation manuel avec selectbox
-page = st.sidebar.selectbox("Choisissez une page :", ["🏠 Accueil", "⚽ Stats Foot"])
-
-if page == "🏠 Accueil":
-    st.title("Bienvenue sur Chattamax 🎉")
-    st.write("Sélectionnez une page dans le menu de gauche.")
-elif page == "⚽ Stats Foot":
-    st.switch_page("pages/stats_foot.py")  # Corrige la navigation
-
-
 
 keyfile_dict = json.loads(st.secrets["GOOGLE_KEY"])
 credentials = Credentials.from_service_account_info(keyfile_dict, scopes=[
