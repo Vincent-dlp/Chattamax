@@ -79,17 +79,17 @@ SEASONS = [2024, 2025]  # Saisons disponibles
 # Interface utilisateur avec Streamlit
 st.title("🔥 Hot players")
 
-col1, col2 = st.columns([2, 1])  # Col1 = Résultats, Col2 = Filtres
+main_col = st.container()  # Conteneur unique pour tout aligner à droite
 
-with col2:  # Filtres placés dans la colonne de droite
-    st.header("📊 Filtres")
+with main_col:  # Filtres placés dans la colonne de droite
+    st.header("Filtres")
     selected_leagues = st.multiselect("Sélectionnez les ligues à analyser", options=list(LEAGUES.keys()), format_func=lambda x: LEAGUES[x])
     min_goals = st.slider("Nombre minimum de buts", 0, 10, 2)
     min_assists = st.slider("Nombre minimum de passes décisives", 0, 10, 2)
     run_analysis = st.button("Lancer l'analyse")
 
 if run_analysis:
-    with col1:  # Résultats placés en dessous des filtres
+    with main_col:  # Résultats placés en dessous des filtres
         st.write("🔄 Analyse en cours...")
     
     team_ids = {}
@@ -163,7 +163,7 @@ if run_analysis:
     df_results = pd.DataFrame(filtered_players)
     
     if run_analysis:
-     with col1:
+     with main_col:
         if not df_results.empty:
             st.write("# Joueurs en forme du moment")
             st.dataframe(df_results.sort_values(by="Buts", ascending=False))
