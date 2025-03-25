@@ -137,10 +137,12 @@ def get_player_stats(fixtures):
 if st.session_state["matchs_generes"]:
     upcoming_matches, match_labels = get_upcoming_fixtures()
     match_options = list(upcoming_matches.keys())
-    selected_match = st.selectbox("Choisissez un match à analyser", match_options, format_func=lambda x: match_labels[x])
-    if st.button("Lancer l'analyse"):
-        st.session_state["match_selectionne"] = True
-        st.session_state["selected_match_id"] = selected_match
+    selected_match = st.selectbox("Choisissez un match à analyser", match_options, format_func=lambda x: match_labels[x], key="match_selector")
+
+    if selected_match:
+        if st.button("Lancer l'analyse"):
+            st.session_state["match_selectionne"] = True
+            st.session_state["selected_match_id"] = selected_match
 
 # Affichage des résultats
 if st.session_state["match_selectionne"] and st.session_state["selected_match_id"]:
