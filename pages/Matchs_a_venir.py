@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 
+
 # Configuration API
 API_KEY = "8610d983bdbd1a47d730f42a0f595b7f"  # Remplacez par votre clé API Football
 BASE_URL = "https://v3.football.api-sports.io/"
@@ -19,111 +20,90 @@ LEAGUES = [
 
 SEASONS = [2024, 2025]
 
+# Initialisation de l'état
+if "matchs_generes" not in st.session_state:
+    st.session_state["matchs_generes"] = False
+if "match_selectionne" not in st.session_state:
+    st.session_state["match_selectionne"] = False
+if "selected_match_id" not in st.session_state:
+    st.session_state["selected_match_id"] = None
+
 st.set_page_config(page_title="Matchs à venir", layout="wide")
 st.title("📅 Matchs à venir")
 
-@st.cache_data(show_spinner=False)
-def get_upcoming_matches():
-    matches = []
-    now = datetime.utcnow()
-    end_time = now + timedelta(hours=72)
-    now_str = now.strftime("%Y-%m-%d")
-    end_str = end_time.strftime("%Y-%m-%d")
+# Bouton de génération
+if st.button("🎲 Générer les matchs à venir"):
+    st.session_state["matchs_generes"] = True
+    st.session_state["match_selectionne"] = False
 
-    for league_id in LEAGUES:
-        for season in SEASONS:
-            url = f"{BASE_URL}fixtures?league={league_id}&season={season}&from={now_str}&to={end_str}"
-            response = requests.get(url, headers=HEADERS)
-            data = response.json()
-            for match in data.get("response", []):
-                fixture_id = match['fixture']['id']
-                home = match['teams']['home']['name']
-                away = match['teams']['away']['name']
-                date = match['fixture']['date'][:16].replace("T", " ")
-                matches.append({
-                    "id": fixture_id,
-                    "label": f"{home} vs {away} ({date})"
-                })
-    return matches
-
-@st.cache_data(show_spinner=False)
-def get_fixture_player_stats(fixture_ids):
-    players_stats = {}
-    for fixture_id in fixture_ids:
-        url = f"{BASE_URL}fixtures/players?fixture={fixture_id}"
+# Fonctions auxiliaires
+def get_upcoming_fixtures():
+    upcoming_matches = {}
+    match_labels = {}
+    end_date = datetime.utcnow() + timedelta(hours=72)
+    today = datetime.utcnow()
+    for league_id, league_name in LEAGUES.items():
+        url = f"{BASE_URL}fixtures?league={league_id}&from={today.strftime('%Y-%m-%d')}&to={end_date.strftime('%Y-%m-%d')}"
         response = requests.get(url, headers=HEADERS)
         data = response.json()
+        for match in data.get("response", []):
+            fixture_id = match["fixture"]["id"]
+            home = match["teams"]["home"]["name"]
+            away = match["teams"]["away"]["name"]
+            date = match["fixture"]["date"][:16].replace("T", " ")
+            label = f"{home} vs {away} ({league_name}) - {date}"
+            upcoming_matches[fixture_id] = match
+            match_labels[fixture_id] = label
+    return upcoming_matches, match_labels
 
-        for team_data in data.get("response", []):
-            for player_data in team_data.get("players", []):
-                if player_data.get("statistics"):
-                    stats = player_data["statistics"][0]
-                    player_id = player_data["player"]["id"]
-                    name = player_data["player"]["name"]
-                    goals = stats["goals"].get("total", 0) or 0
-                    assists = stats["goals"].get("assists", 0) or 0
-                    minutes = stats["games"].get("minutes", 0) or 0
-                    matches = 1 if minutes > 0 else 0
+def get_player_stats(fixtures):
+    players_stats = {}
+    for fixture_id in fixtures:
+        url_players_stats = f"{BASE_URL}fixtures/players?fixture={fixture_id}"
+        response_players_stats = requests.get(url_players_stats, headers=HEADERS)
+        data_players_stats = response_players_stats.json()
+        if "response" in data_players_stats:
+            for team_data in data_players_stats["response"]:
+                for player_data in team_data["players"]:
+                    if player_data.get("statistics"):
+                        player_id = player_data["player"]["id"]
+                        player_name = player_data["player"]["name"]
+                        goals = player_data["statistics"][0]["goals"].get("total", 0) or 0
+                        assists = player_data["statistics"][0]["goals"].get("assists", 0) or 0
+                        minutes_played = player_data["statistics"][0]["games"].get("minutes", 0) or 0
+                        matches_played = 1 if minutes_played > 10 else 0
+                        if player_id not in players_stats:
+                            players_stats[player_id] = {"Nom": player_name, "Buts": 0, "Passes D": 0, "Matchs Joués": 0, "Minutes Jouées": 0, "Temps de jeu moyen": 0, "Buts toutes les X minutes": 0}
+                        players_stats[player_id]["Buts"] += goals
+                        players_stats[player_id]["Passes D"] += assists
+                        players_stats[player_id]["Matchs Joués"] += matches_played
+                        players_stats[player_id]["Minutes Jouées"] += minutes_played
+                        players_stats[player_id]["Temps de jeu moyen"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))
+                        players_stats[player_id]["Buts toutes les X minutes"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1))
+    return players_stats
 
-                    if player_id not in players_stats:
-                        players_stats[player_id] = {
-                            "Nom": name,
-                            "Buts": 0,
-                            "Passes D": 0,
-                            "Matchs Joués": 0,
-                            "Minutes Jouées": 0,
-                            "Temps de jeu moyen": 0,
-                            "Buts toutes les X minutes": 0,
-                        }
-                    players_stats[player_id]["Buts"] += goals
-                    players_stats[player_id]["Passes D"] += assists
-                    players_stats[player_id]["Matchs Joués"] += matches
-                    players_stats[player_id]["Minutes Jouées"] += minutes
-                    players_stats[player_id]["Temps de jeu moyen"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Matchs Joués"], 1))
-                    players_stats[player_id]["Buts toutes les X minutes"] = round(players_stats[player_id]["Minutes Jouées"] / max(players_stats[player_id]["Buts"], 1))
+# Affichage après clic sur "Générer les matchs"
+if st.session_state["matchs_generes"]:
+    upcoming_matches, match_labels = get_upcoming_fixtures()
+    match_options = list(upcoming_matches.keys())
+    selected_match = st.selectbox("Choisissez un match à analyser", match_options, format_func=lambda x: match_labels[x])
+    if st.button("Lancer l'analyse"):
+        st.session_state["match_selectionne"] = True
+        st.session_state["selected_match_id"] = selected_match
 
-    return list(players_stats.values())
-
-if st.button("🎯 Générer les matchs à venir"):
-    all_matches = get_upcoming_matches()
-    if not all_matches:
-        st.warning("Aucun match à venir trouvé pour les 72 prochaines heures.")
+# Affichage des résultats
+if st.session_state["match_selectionne"] and st.session_state["selected_match_id"]:
+    st.write("🔍 Analyse en cours...")
+    match_id = st.session_state["selected_match_id"]
+    fixtures = [match_id]
+    players_stats = get_player_stats(fixtures)
+    filtered_players = [
+        stats for stats in players_stats.values()
+        if stats['Minutes Jouées'] > 10
+    ]
+    df_results = pd.DataFrame(filtered_players)
+    if not df_results.empty:
+        st.write("### Résultats de l'analyse")
+        st.dataframe(df_results.sort_values(by="Buts", ascending=False))
     else:
-        match_dict = {m["label"]: m["id"] for m in all_matches}
-        selected_label = st.selectbox("Sélectionnez un match à analyser", options=list(match_dict.keys()))
-
-        if st.button("Lancer l'analyse"):
-            st.write("🔎 Analyse en cours...")
-            selected_id = match_dict[selected_label]
-
-            # Récupérer les deux équipes du match
-            url_match = f"{BASE_URL}fixtures?id={selected_id}"
-            match_data = requests.get(url_match, headers=HEADERS).json()
-
-            team_ids = []
-            for item in match_data.get("response", []):
-                team_ids.append(item['teams']['home']['id'])
-                team_ids.append(item['teams']['away']['id'])
-
-            # Récupérer les matchs des 3 derniers mois
-            start_date = (datetime.utcnow() - timedelta(days=90)).strftime('%Y-%m-%d')
-            end_date = datetime.utcnow().strftime('%Y-%m-%d')
-
-            all_fixture_ids = []
-            for team_id in team_ids:
-                for season in SEASONS:
-                    url_fixtures = f"{BASE_URL}fixtures?team={team_id}&season={season}&from={start_date}&to={end_date}"
-                    response = requests.get(url_fixtures, headers=HEADERS)
-                    data = response.json()
-                    fixture_ids = [m['fixture']['id'] for m in data.get("response", []) if m['fixture']['status']['short'] == "FT"]
-                    all_fixture_ids.extend(fixture_ids)
-
-            # Récup stats joueurs
-            stats = get_fixture_player_stats(all_fixture_ids)
-            df_results = pd.DataFrame(stats)
-
-            if not df_results.empty:
-                st.write("### Résultats de l'analyse")
-                st.dataframe(df_results.sort_values(by="Buts", ascending=False))
-            else:
-                st.write("❌ Aucun joueur ne correspond aux critères.")
+        st.write("❌ Aucun joueur ne correspond aux critères sélectionnés.")
