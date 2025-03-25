@@ -3,22 +3,73 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 
-
 # Configuration API
 API_KEY = "8610d983bdbd1a47d730f42a0f595b7f"  # Remplacez par votre clé API Football
 BASE_URL = "https://v3.football.api-sports.io/"
 HEADERS = {"x-apisports-key": API_KEY}
 
-# Liste des ligues concernées
-LEAGUES = [
-    129, 188, 344, 71, 265, 169, 239, 242, 98, 262, 250, 252,
-    307, 253, 310, 218, 144, 172, 345, 119, 39, 40, 329, 244,
-    61, 62, 327, 78, 79, 197, 271, 165, 357, 383, 135, 136,
-    389, 364, 362, 88, 408, 103, 94, 95, 283, 235, 179, 286,
-    332, 140, 141, 113, 207, 203, 333, 110, 2, 3, 848
-]
-
-SEASONS = [2024, 2025]
+# Ligues sélectionnées
+LEAGUES = {
+    129: "Primera Nacional (Argentina)",
+    188: "A-League (Australia)",
+    344: "Primera División (Bolivia)",
+    71: "Serie A (Brazil)",
+    265: "Primera División (Chile)",
+    169: "Super League (China)",
+    239: "Primera A (Colombia)",
+    242: "Liga Pro (Ecuador)",
+    98: "J1 League (Japan)",
+    262: "Liga MX (Mexico)",
+    250: "Division Profesional - Apertura (Paraguay)",
+    252: "Division Profesional - Clausura (Paraguay)",
+    307: "Pro League (Saudi-Arabia)",
+    253: "Major League Soccer (USA)",
+    310: "Superliga (Albania)",
+    218: "Bundesliga (Austria)",
+    144: "Jupiler Pro League (Belgium)",
+    172: "First League (Bulgaria)",
+    345: "Czech Liga (Czech-Republic)",
+    119: "Superliga (Denmark)",
+    39: "Premier League (England)",
+    40: "Championship (England)",
+    329: "Meistriliiga (Estonia)",
+    244: "Veikkausliiga (Finland)",
+    61: "Ligue 1 (France)",
+    62: "Ligue 2 (France)",
+    327: "Erovnuli Liga (Georgia)",
+    78: "Bundesliga (Germany)",
+    79: "2. Bundesliga (Germany)",
+    197: "Super League 1 (Greece)",
+    271: "NB I (Hungary)",
+    165: "1. Deild (Iceland)",
+    357: "Premier Division (Ireland)",
+    383: "Ligat Ha'al (Israel)",
+    135: "Serie A (Italy)",
+    136: "Serie B (Italy)",
+    389: "Premier League (Kazakhstan)",
+    364: "1. Liga (Latvia)",
+    362: "A Lyga (Lithuania)",
+    88: "Eredivisie (Netherlands)",
+    408: "Premiership (Northern-Ireland)",
+    103: "Eliteserien (Norway)",
+    94: "Primeira Liga (Portugal)",
+    95: "Segunda Liga (Portugal)",
+    283: "Liga I (Romania)",
+    235: "Premier League (Russia)",
+    179: "Premiership (Scotland)",
+    286: "Super Liga (Serbia)",
+    332: "Super Liga (Slovakia)",
+    140: "La Liga (Spain)",
+    141: "Segunda División (Spain)",
+    113: "Allsvenskan (Sweden)",
+    207: "Super League (Switzerland)",
+    203: "Süper Lig (Turkey)",
+    333: "Premier League (Ukraine)",
+    110: "Premier League (Wales)",
+    2: "UEFA Champions League (World)",
+    3: "UEFA Europa League (World)",
+    848: "UEFA Europa Conference League (World)"
+}
 
 # Initialisation de l'état
 if "matchs_generes" not in st.session_state:
